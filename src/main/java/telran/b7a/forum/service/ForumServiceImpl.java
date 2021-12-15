@@ -1,5 +1,8 @@
 package telran.b7a.forum.service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +12,7 @@ import telran.b7a.forum.dto.NewCommentDto;
 import telran.b7a.forum.dto.NewPostDto;
 import telran.b7a.forum.dto.PostDto;
 import telran.b7a.forum.dto.exceptions.PostNotFoundException;
+import telran.b7a.forum.model.Comment;
 import telran.b7a.forum.model.Post;
 
 @Service
@@ -37,32 +41,52 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public PostDto removePost(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		postRepository.delete(post);
+		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
 	public PostDto updatePost(NewPostDto postUpdateDto, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		String content = postUpdateDto.getContent();
+		if (content != null) {
+			post.setContent(content);
+		}
+		String title = postUpdateDto.getTitle();
+		if (title != null) {
+			post.setTitle(title);
+		}
+		Set<String> tags = postUpdateDto.getTags();
+		if (tags != null) {
+			tags.forEach(post::addTag);
+		}
+		postRepository.save(post);
+		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
 	public void addLike(String id) {
-		// TODO Auto-generated method stub
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		post.addLike();
+		postRepository.save(post);
 
 	}
 
 	@Override
 	public PostDto addComment(String id, String author, NewCommentDto newCommentDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		Comment comment =new Comment(author, newCommentDto.getMessage());
+		post.addComment(comment);
+		postRepository.save(post);
+		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByAuthor(String author) {
-		// TODO Auto-generated method stub
-		return null;
+		return postRepository.findByAuthor(author)
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
 	}
 
 }

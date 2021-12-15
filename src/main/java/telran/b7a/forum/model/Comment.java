@@ -19,16 +19,14 @@ public class Comment {
 	@Setter
 	String message;
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	LocalDateTime dateCreated;
+	LocalDateTime dateCreated = LocalDateTime.now();
 	int likes;
 
 	public Comment(String user, String message) {
-		dateCreated = LocalDateTime.now();
 		this.user = user;
 		this.message = message;
-		
 	}
-	
+
 	public void addLike() {
 		likes++;
 	}

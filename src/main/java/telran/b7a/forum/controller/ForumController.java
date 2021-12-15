@@ -1,6 +1,7 @@
 package telran.b7a.forum.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import telran.b7a.forum.dto.NewCommentDto;
@@ -47,6 +49,7 @@ public class ForumController {
 	}
 
 	@PutMapping("/post/{id}/like")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void addLike(@PathVariable String id) {
 		service.addLike(id);
 	}
@@ -58,8 +61,8 @@ public class ForumController {
 	}
 
 	@GetMapping("/posts/author/{author}")
-	public Iterable<PostDto> getPostsByAuthor(@PathVariable String author) {
-		return service.findPostsByAuthor(author);
+	public Iterable<PostDto> getPostsByAuthor(@PathVariable("author") String name) {
+		return service.findPostsByAuthor(name);
 	}
 
 }
