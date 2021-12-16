@@ -1,5 +1,6 @@
 package telran.b7a.forum.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import telran.b7a.forum.dao.PostRepository;
+import telran.b7a.forum.dto.DatePeriodDto;
 import telran.b7a.forum.dto.NewCommentDto;
 import telran.b7a.forum.dto.NewPostDto;
 import telran.b7a.forum.dto.PostDto;
@@ -85,6 +87,20 @@ public class ForumServiceImpl implements ForumService {
 	@Override
 	public Iterable<PostDto> findPostsByAuthor(String author) {
 		return postRepository.findByAuthor(author)
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Iterable<PostDto> findPostsByTags(List<String> tags) {
+		return postRepository.findByTagsIn(tags)
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Iterable<PostDto> findPostsByDates(DatePeriodDto datePeriodDto) {
+		return postRepository.findByDateCreatedBetween(datePeriodDto.getDateFrom(), datePeriodDto.getDateTo())
 				.map(p -> modelMapper.map(p, PostDto.class))
 				.collect(Collectors.toList());
 	}

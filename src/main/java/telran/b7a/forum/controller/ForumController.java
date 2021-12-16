@@ -1,5 +1,7 @@
 package telran.b7a.forum.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import telran.b7a.forum.dto.DatePeriodDto;
 import telran.b7a.forum.dto.NewCommentDto;
 import telran.b7a.forum.dto.NewPostDto;
 import telran.b7a.forum.dto.PostDto;
@@ -63,6 +66,16 @@ public class ForumController {
 	@GetMapping("/posts/author/{author}")
 	public Iterable<PostDto> getPostsByAuthor(@PathVariable("author") String name) {
 		return service.findPostsByAuthor(name);
+	}
+	
+	@PostMapping("/posts/tags")
+	public Iterable<PostDto> findPostsByTags(@RequestBody List<String> tags) {
+		return service.findPostsByTags(tags);
+	}
+	
+	@PostMapping("/posts/period")
+	public Iterable<PostDto> findPostsByDate(@RequestBody DatePeriodDto datePeriodDto) {
+		return service.findPostsByDates(datePeriodDto);
 	}
 
 }
