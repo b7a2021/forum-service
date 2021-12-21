@@ -16,16 +16,19 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import telran.b7a.accounting.dao.UserAccountRepository;
-import telran.b7a.accounting.model.UserAccount;
+import telran.b7a.security.SecurityContext;
+import telran.b7a.security.UserProfile;
 
 @Service
 @Order(20)
 public class AdminFilter implements Filter {
 	UserAccountRepository repository;
+	SecurityContext securityContext;
 
 	@Autowired
-	public AdminFilter(UserAccountRepository repository) {
+	public AdminFilter(UserAccountRepository repository, SecurityContext securityContext) {
 		this.repository = repository;
+		this.securityContext = securityContext;
 	}
 
 	@Override
@@ -35,8 +38,8 @@ public class AdminFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;		
 		if(checkEndPoints(request.getServletPath(), request.getMethod())) {
 			Principal principal = request.getUserPrincipal();
-			UserAccount userAccount = repository.findById(principal.getName()).get();
-			if (!userAccount.getRoles().contains("Administrator".toUpperCase())) {
+			UserProfile user = securityContext.getUser(principal.getName());
+			if (!user.getRoles().contains("Administrator".toUpperCase())) {
 				response.sendError(403);
 				return;
 			}

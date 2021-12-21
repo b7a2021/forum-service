@@ -21,16 +21,20 @@ import org.springframework.stereotype.Service;
 
 import telran.b7a.accounting.dao.UserAccountRepository;
 import telran.b7a.accounting.model.UserAccount;
+import telran.b7a.security.SecurityContext;
+import telran.b7a.security.UserProfile;
 
 @Service
 @Order(10)
 public class AuthenticationFilter implements Filter {
 
 	UserAccountRepository repository;
+	SecurityContext securityContext;
 
 	@Autowired
-	public AuthenticationFilter(UserAccountRepository repository) {
+	public AuthenticationFilter(UserAccountRepository repository, SecurityContext securityContext) {
 		this.repository = repository;
+		this.securityContext = securityContext;
 	}
 
 	@Override
@@ -59,6 +63,12 @@ public class AuthenticationFilter implements Filter {
 				return;
 			}
 			request = new WrappedRequest(request, credentials[0]);
+			UserProfile user = UserProfile.builder()
+									.login(userAccount.getLogin())
+									.password(userAccount.getPassword())
+									.roles(userAccount.getRoles())
+									.build();
+			securityContext.addUser(user);
 		}
 		chain.doFilter(request, response);
 
