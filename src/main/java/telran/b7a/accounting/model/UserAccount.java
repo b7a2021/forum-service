@@ -8,12 +8,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @EqualsAndHashCode(of = { "login" })
 @Document(collection = "users")
+@NoArgsConstructor
 public class UserAccount {
 	@Id
 	String login;
@@ -21,6 +23,13 @@ public class UserAccount {
 	String firstName;
 	String lastName;
 	Set<String> roles = new HashSet<>();
+	
+	public UserAccount(String login, String password, String firstName, String lastName) {
+		this.login = login;
+		this.password = password;
+		this.firstName = firstName;
+		this.lastName = lastName;
+	}
 
 	public boolean addRole(String role) {
 		return roles.add(role);

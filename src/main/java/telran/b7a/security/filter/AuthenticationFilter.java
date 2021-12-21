@@ -16,12 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import telran.b7a.accounting.dao.UserAccountRepository;
 import telran.b7a.accounting.model.UserAccount;
 
 @Service
+@Order(10)
 public class AuthenticationFilter implements Filter {
 
 	UserAccountRepository repository;
