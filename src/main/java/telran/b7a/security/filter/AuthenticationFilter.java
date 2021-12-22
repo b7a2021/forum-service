@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import telran.b7a.accounting.dao.UserAccountRepository;
 import telran.b7a.accounting.model.UserAccount;
 import telran.b7a.security.SecurityContext;
+import telran.b7a.security.SessionService;
 import telran.b7a.security.UserProfile;
 
 @Service
@@ -30,11 +31,14 @@ public class AuthenticationFilter implements Filter {
 
 	UserAccountRepository repository;
 	SecurityContext securityContext;
+	SessionService sessionService;
 
 	@Autowired
-	public AuthenticationFilter(UserAccountRepository repository, SecurityContext securityContext) {
+	public AuthenticationFilter(UserAccountRepository repository, SecurityContext securityContext,
+			SessionService sessionService) {
 		this.repository = repository;
 		this.securityContext = securityContext;
+		this.sessionService = sessionService;
 	}
 
 	@Override
@@ -44,30 +48,35 @@ public class AuthenticationFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 		if (checkEndPoints(request.getServletPath(), request.getMethod())) {
 			String token = request.getHeader("Authorization");
-			if (token == null) {
+			String sessionId = request.getSession().getId();
+			UserAccount userAccount = sessionService.getUser(sessionId);
+			if (token == null && userAccount == null) {
 				response.sendError(401, "Header Authorization not found");
 				return;
 			}
-			String[] credentials = getCredentials(token).orElse(null);
-			if (credentials == null || credentials.length < 2) {
-				response.sendError(401, "Token not valid");
-				return;
-			}
-			UserAccount userAccount = repository.findById(credentials[0]).orElse(null);
-			if (userAccount == null) {
-				response.sendError(401, "User not found");
-				return;
-			}
-			if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
-				response.sendError(401, "User or password not valid");
-				return;
-			}
-			request = new WrappedRequest(request, credentials[0]);
+			if (token != null) {
+				String[] credentials = getCredentials(token).orElse(null);
+				if (credentials == null || credentials.length < 2) {
+					response.sendError(401, "Token not valid");
+					return;
+				}
+				userAccount = repository.findById(credentials[0]).orElse(null);
+				if (userAccount == null) {
+					response.sendError(401, "User not found");
+					return;
+				}
+				if (!BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
+					response.sendError(401, "User or password not valid");
+					return;
+				}
+				sessionService.addUser(sessionId, userAccount);
+			} 
+			request = new WrappedRequest(request, userAccount.getLogin());
 			UserProfile user = UserProfile.builder()
-									.login(userAccount.getLogin())
-									.password(userAccount.getPassword())
-									.roles(userAccount.getRoles())
-									.build();
+										.login(userAccount.getLogin())
+										.password(userAccount.getPassword())
+										.roles(userAccount.getRoles())
+										.build();
 			securityContext.addUser(user);
 		}
 		chain.doFilter(request, response);
