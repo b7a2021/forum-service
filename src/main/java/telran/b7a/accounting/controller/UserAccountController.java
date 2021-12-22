@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import telran.b7a.accounting.dto.RolesResponseDto;
 import telran.b7a.accounting.dto.UserAccountResponseDto;
-import telran.b7a.accounting.dto.UserLoginDto;
 import telran.b7a.accounting.dto.UserRegisterDto;
 import telran.b7a.accounting.dto.UserUpdateDto;
 import telran.b7a.accounting.service.UserAccountService;
@@ -59,9 +59,9 @@ public class UserAccountController {
 		return accountService.changeRolesList(login, role, false);
 	}
 
-	@PutMapping("/user/password")
-	public void changePassword(@RequestBody UserLoginDto user) {
-		accountService.changePassword(user.getLogin(), user.getPassword());
+	@PutMapping("/password")
+	public void changePassword(Principal principal, @RequestHeader("X-Password") String password) {
+		accountService.changePassword(principal.getName(), password);
 	}
 
 
